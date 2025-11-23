@@ -3,8 +3,6 @@ name: Advanced Auto Healing Pipeline
 on:
   push:
     branches: [ main ]
-  schedule:
-    - cron: '0 0 * * *'
 
 jobs:
   intelligent-healing:
@@ -14,7 +12,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         
@@ -36,29 +34,6 @@ jobs:
           rm broken.txt
           HEALING_REPORT+="✅ Removed broken.txt\n"
           NEEDS_COMMIT="true"
-        fi
-        
-        # Layer 2: Dependencies health
-        if [ -f "requirements.txt" ]; then
-          echo "🔧 Validating dependencies..."
-          if pip install -r requirements.txt; then
-            echo "✅ Dependencies are healthy"
-          else
-            echo "🚑 Fixing dependency issues"
-            sed -i 's/>=/==/g' requirements.txt 2>/dev/null || true
-            HEALING_REPORT+="✅ Fixed dependency versions\n"
-            NEEDS_COMMIT="true"
-          fi
-        fi
-        
-        # Layer 3: Code quality health
-        if [ -f "src/app.py" ]; then
-          echo "🔍 Analyzing code health..."
-          if grep -q "printx(" src/app.py; then
-            sed -i 's/printx(/print(/g' src/app.py
-            HEALING_REPORT+="✅ Fixed print syntax\n"
-            NEEDS_COMMIT="true"
-          fi
         fi
         
         # Set output if healing occurred
