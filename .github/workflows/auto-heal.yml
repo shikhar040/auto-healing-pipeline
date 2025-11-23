@@ -20,7 +20,7 @@ jobs:
     - name: Auto-heal broken files
       id: heal
       run: |
-        echo "🔍 Scanning for broken files..."
+        echo "🔍 Scanning for issues..."
         if [ -f "broken.txt" ]; then
           echo "🚑 Removing broken.txt"
           rm broken.txt
@@ -33,13 +33,13 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add .
-        git commit -m "🤖 Auto-heal: Removed broken files"
-        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git commit -m "🤖 Auto-heal: Fixed issues"
+        git push
         
     - name: Run tests
       run: |
-        echo "🧪 Testing..."
+        echo "🧪 Running tests..."
         bash tests/test_script.sh
         
     - name: Success
-      run: echo "🎉 Auto-healing successful!"
+      run: echo "🎉 Pipeline completed successfully!"
