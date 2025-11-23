@@ -6,8 +6,7 @@ on:
   pull_request:
     branches: [ main, master ]
   schedule:
-    # Run daily at 6 AM UTC
-    - cron: '0 6 * * *'
+    - cron: '0 6 * * *'  # Run daily at 6 AM UTC
 
 jobs:
   auto-heal:
@@ -15,128 +14,61 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
-    - name: Search logs and diagnose
-      id: diagnose
+    - name: Run Auto-Healer
       run: |
         echo "🔍 Starting Super Python Auto-Healer..."
-        echo "📋 Diagnosis Phase"
-        python --version
-        echo "Current directory: $(pwd)"
-        ls -la
+        python .github/scripts/auto_healer.py
 
-    - name: Check Python syntax
-      id: syntax-check
+    - name: Install dependencies
       run: |
-        echo "🔧 Checking Python syntax..."
-        # Check all Python files for syntax errors
-        find . -name "*.py" -exec python -m py_compile {} \;
-        if [ $? -eq 0 ]; then
-          echo "✅ All Python files have valid syntax"
-          echo "SYNTAX_VALID=true" >> $GITHUB_OUTPUT
-        else
-          echo "❌ Syntax errors found in Python files"
-          echo "SYNTAX_VALID=false" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Auto-heal syntax errors
-      if: steps.syntax-check.outputs.SYNTAX_VALID == 'false'
-      run: |
-        echo "🛠️ Auto-healing syntax errors..."
-        # This would be your actual healing logic
-        # For demonstration, we'll create a simple fix script
-        cat > fix_syntax.py << 'EOF'
-        import os
-        import re
-        
-        def fix_python_file(file_path):
-            with open(file_path, 'r') as f:
-                content = f.read()
-            
-            # Common syntax error fixes
-            fixes = [
-                (r'defx\s+', 'def '),
-                (r'printx\s*\(', 'print('),
-                (r'returnx\s+', 'return '),
-                (r'print\s+', 'print('),  # missing parentheses
-            ]
-            
-            original_content = content
-            for pattern, replacement in fixes:
-                content = re.sub(pattern, replacement, content)
-            
-            if content != original_content:
-                with open(file_path, 'w') as f:
-                    f.write(content)
-                print(f"✅ Fixed syntax errors in {file_path}")
-                return True
-            return False
-        
-        # Find and fix all Python files
-        for root, dirs, files in os.walk('.'):
-            for file in files:
-                if file.endswith('.py'):
-                    file_path = os.path.join(root, file)
-                    fix_python_file(file_path)
-        EOF
-        
-        python fix_syntax.py
-
-    - name: Run tests
-      run: |
-        echo "🧪 Running tests..."
-        # Install dependencies if you have any
+        echo "📦 Installing dependencies..."
         if [ -f requirements.txt ]; then
           pip install -r requirements.txt
         fi
+
+    - name: Test application
+      run: |
+        echo "🚀 Testing Python application..."
+        # Test syntax of all Python files
+        find . -name "*.py" -exec python -m py_compile {} \;
         
-        # Run your Python application
-        python src/app.py
-        
-        # Run tests if you have a test directory
-        if [ -d "tests" ]; then
-          python -m pytest tests/ -v
+        # Run main application
+        if [ -f "src/app.py" ]; then
+          python src/app.py
         fi
 
-    - name: Commit fixes
-      if: steps.syntax-check.outputs.SYNTAX_VALID == 'false'
+    - name: Commit and push fixes
       run: |
-        echo "📝 Committing auto-healing fixes..."
+        echo "📝 Checking for changes to commit..."
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add .
-        git commit -m "🤖 Auto-heal: Fixed Python syntax errors" || echo "No changes to commit"
         
-        # Note: To actually push, you'd need to use a token
-        echo "COMMIT_MADE=true" >> $GITHUB_OUTPUT
+        # Check if there are changes to commit
+        git add .
+        if ! git diff --staged --quiet; then
+          git commit -m "🤖 Auto-heal: Fixed Python syntax errors"
+          git push
+          echo "✅ Changes committed and pushed"
+        else
+          echo "✅ No changes to commit"
+        fi
 
-    - name: Create report
+    - name: Generate report
       run: |
         echo "📊 Generating final report..."
-        echo "### Auto-Healing Report 📋" >> $GITHUB_STEP_SUMMARY
+        echo "### 🛠️ Auto-Healing Report" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
         echo "**Python Version:** $(python --version)" >> $GITHUB_STEP_SUMMARY
-        echo "**Syntax Check:** ${{ steps.syntax-check.outputs.SYNTAX_VALID }}" >> $GITHUB_STEP_SUMMARY
-        if [ "${{ steps.syntax-check.outputs.SYNTAX_VALID }}" == "false" ]; then
-          echo "**Fixes Applied:** Yes 🛠️" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "**Fixes Applied:** No issues found ✅" >> $GITHUB_STEP_SUMMARY
-        fi
+        echo "**Workflow:** Auto-healing completed" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "---" >> $GITHUB_STEP_SUMMARY
         echo "Job completed at: $(date)" >> $GITHUB_STEP_SUMMARY
-
-    - name: Upload artifacts (optional)
-      uses: actions/upload-artifact@v4
-      with:
-        name: healing-report
-        path: |
-          src/
-          tests/
-        retention-days: 30

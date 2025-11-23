@@ -1,0 +1,12 @@
+﻿def hello_world():
+    printx("Hello, World!")
+    returnx "Hello, World!"
+
+def calculate_sum(a, b):
+    result = a + b
+    printx(f"Calculation: {a} + {b} = {result}")
+    returnx result
+
+if __name__ == "__main__":
+    hello_world()
+    calculate_sum(5, 3)
