@@ -62,6 +62,28 @@ class PythonAutoHealer:
             print(f"❌ Error healing {file_path}: {e}")
             return False
     
+    def cleanup_test_files(self, directory='.'):
+        """Remove test files created during testing"""
+        test_patterns = [
+            '*test*.py',
+            '*broken*.py', 
+            'temp_*.py',
+            'test_*.py'
+        ]
+        
+        files_removed = 0
+        for pattern in test_patterns:
+            for test_file in Path(directory).rglob(pattern):
+                if test_file.name != 'test_basic.py':  # Keep your actual test file
+                    try:
+                        test_file.unlink()
+                        print(f"🗑️ Removed: {test_file}")
+                        files_removed += 1
+                    except Exception as e:
+                        print(f"❌ Error removing {test_file}: {e}")
+        
+        return files_removed
+    
     def heal_directory(self, directory='.'):
         """Heal all Python files in directory"""
         python_files = list(Path(directory).rglob('*.py'))
@@ -71,6 +93,13 @@ class PythonAutoHealer:
             self.heal_file(str(py_file))
         
         print(f"🎯 Applied {self.fixes_applied} fixes across {len(python_files)} files")
+        
+        # Optional: Cleanup test files
+        cleanup = input("Do you want to cleanup test files? (y/n): ").lower().strip()
+        if cleanup == 'y':
+            removed = self.cleanup_test_files(directory)
+            print(f"🗑️ Removed {removed} test files")
+        
         return self.fixes_applied
 
 if __name__ == '__main__':

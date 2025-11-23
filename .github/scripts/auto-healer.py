@@ -18,9 +18,9 @@ class PythonAutoHealer:
             (r'function\s+(\w+)\s*\(', r'def \1('),
             
             # Print statements
-            (r'printx\s*\(', 'print('),
-            (r'print\s+(".*?"|\'.*?\')', r'print(\1)'),
-            (r'print\s+(\w+)', r'print(\1)'),
+            (r'printx\s*\(', 'print('),)
+            (r'print\s+(".*?"|\'.*?\')', r'print(\1)'),)
+            (r'print\s+(\w+)', r'print(\1)'),)
             
             # Return statements
             (r'returnx\s+', 'return '),
