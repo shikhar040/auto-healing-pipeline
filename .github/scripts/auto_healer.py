@@ -14,22 +14,19 @@ class PythonAutoHealer:
         self.fixes_applied = 0
         self.common_fixes = [
             # Function definitions
-            (r'defx\s+(\w+)\s*\(', r'def \1('),
-            (r'function\s+(\w+)\s*\(', r'def \1('),
+            (r'defx\s+', 'def '),
             
-            # Print statements
-            (r'printx\s*\(', 'print('),
-            (r'print\s+(".*?"|\'.*?\')', r'print(\1)'),
-            (r'print\s+(\w+)', r'print(\1)'),
+            # Print statements - multiple patterns
+            (r'printx\s*\(', 'print('),  # print(with parentheses
+            (r'printx\s+', 'print('),    # print(without parentheses
+            (r'print\s+(".*?"|\'.*?\')', r'print(\1)'),  # print(without) parentheses
+            (r'print\s+(\w+)', r'print(\1)'),  # print(variable) without parentheses
             
             # Return statements
             (r'returnx\s+', 'return '),
             
-            # Missing colons
-            (r'(def|class|if|elif|else|for|while|with|try|except)\s*\(.*\)\s*\n\s*', r'\1:\n    '),
-            
             # Class definitions
-            (r'class\s+(\w+)\s*\(', r'class \1('),
+            (r'classx\s+', 'class '),
         ]
     
     def heal_file(self, file_path):
@@ -41,6 +38,18 @@ class PythonAutoHealer:
             healed_content = original_content
             for pattern, replacement in self.common_fixes:
                 healed_content = re.sub(pattern, replacement, healed_content)
+            
+            # Add missing closing parentheses for print(statements)
+            lines = healed_content.split('\n')
+            fixed_lines = []
+            for line in lines:
+                if 'print(' in line and not line.rstrip().endswith(')') and '#' not in line:
+                    # Count quotes to see if we have a complete string
+                    if line.count('"') % 2 == 0 and line.count("'") % 2 == 0:
+                        line += ')'
+                fixed_lines.append(line)
+            
+            healed_content = '\n'.join(fixed_lines)
             
             if healed_content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
