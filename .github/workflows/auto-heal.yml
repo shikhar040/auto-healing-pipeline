@@ -1,0 +1,42 @@
+name: Auto Healing Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Auto-heal
+      id: heal
+      run: |
+        echo "🔍 Scanning..."
+        if [ -f "broken.txt" ]; then
+          echo "🚑 Removing broken.txt"
+          rm broken.txt
+          echo "needs_commit=true" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Commit fixes
+      if: steps.heal.outputs.needs_commit == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "🤖 Auto-heal: Removed broken files"
+        git push
+        
+    - name: Run tests
+      run: |
+        echo "🧪 Testing..."
+        bash tests/test_script.sh
