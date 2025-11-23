@@ -19,7 +19,7 @@ jobs:
       with:
         python-version: '3.9'
         
-    - name: Detect problems and auto-heal
+        - name: Detect problems and auto-heal
       id: heal
       run: |
         echo "🔍 Starting Auto-Healing Diagnostic Scan..."
@@ -41,10 +41,20 @@ jobs:
             echo "✅ Python syntax is valid"
           else
             echo "🚑 HEALING: Fixing Python syntax issues"
-            # Fix common Python errors
+            # Fix common Python errors with better pattern matching
             sed -i 's/printx(/print(/g' src/app.py 2>/dev/null || true
-            sed -i 's/print (/print(/g' src/app.py 2>/dev/null || true
-            NEEDS_COMMIT="true"
+            sed -i 's/print \(/print(/g' src/app.py 2>/dev/null || true
+            sed -i 's/importx flask/import flask/g' src/app.py 2>/dev/null || true
+            sed -i "s/''''/'/g" src/app.py 2>/dev/null || true
+            
+            # Test if fixes worked
+            if python -m py_compile src/app.py; then
+              echo "✅ Python syntax fixed successfully"
+              NEEDS_COMMIT="true"
+            else
+              echo "❌ Could not auto-fix Python syntax"
+              exit 1
+            fi
           fi
         fi
         
