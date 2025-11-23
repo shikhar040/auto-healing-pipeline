@@ -44,6 +44,11 @@ jobs:
         if [ -f "src/app.py" ]; then
           python src/app.py
         fi
+        
+        # Run tests
+        if [ -f "tests/test_basic.py" ]; then
+          python tests/test_basic.py
+        fi
 
     - name: Commit and push fixes
       run: |
