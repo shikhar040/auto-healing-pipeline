@@ -9,11 +9,15 @@ on:
 jobs:
   intelligent-healing:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -72,7 +76,7 @@ jobs:
         git config --local user.name "Advanced Auto-Heal Bot"
         git add .
         git commit -m "🤖 Advanced Auto-heal: Comprehensive fixes"
-        git push
+        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
         
     - name: Run validation suite
       run: |
