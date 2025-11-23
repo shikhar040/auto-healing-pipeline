@@ -1,8 +1,8 @@
-﻿def hello_world():
+﻿defx hello_world():
     print("Hello, World!")
     return "Hello, World!"
 
-def calculate_sum(a, b):
+defx calculate_sum(a, b):
     result = a + b
     print(f"Calculation: {a} + {b} = {result}")
     return result
