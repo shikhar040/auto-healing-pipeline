@@ -9,101 +9,101 @@ This file should also be DELETED by the auto-healer
 # ADVANCED CLASS PATTERNS
 # ========================
 
-classx AdvancedClass:
+class AdvancedClass:
     _private_var = "private"
     public_var = "public"
     
-    defx __init__(self, data):
+    def __init__(self, data):
         self._data = data
         self.history = []
-        printx "AdvancedClass instance created"
+        print("AdvancedClass instance created")
     
-    defx process_with_logging(self, value):
+    def process_with_logging(self, value):
         self.history.append(value)
         result = self._complex_processing(value)
-        printx f"Processed {value} -> {result}")
-        returnx result
+        print(f"Processed {value} -> {result}")
+        return result
     
-    defx _complex_processing(self, value):
+    def _complex_processing(self, value):
         # Private method with complex logic
         if isinstance(value, int):
-            returnx value ** 2 + 10
+            return value ** 2 + 10
         elif isinstance(value, str):
-            returnx value.upper() + "_PROCESSED"
+            return value.upper() + "_PROCESSED"
         else:
-            returnx str(value) + "_CONVERTED"
+            return str(value) + "_CONVERTED"
     
     @property
-    defx data_summary(self):
+    def data_summary(self):
         total = len(self.history)
         last_item = self.history[-1] if self.history else None
-        returnx {"total_operations": total, "last_item": last_item}
+        return {"total_operations": total, "last_item": last_item}
 
 # ========================
 # ITERATOR PATTERNS
 # ========================
 
-classx CustomIterator:
-    defx __init__(self, data):
+class CustomIterator:
+    def __init__(self, data):
         self.data = data
         self.index = 0
     
-    defx __iter__(self):
-        returnx self
+    def __iter__(self):
+        return self
     
-    defx __next__(self):
+    def __next__(self):
         if self.index >= len(self.data):
             raisex StopIteration
         value = self.data[self.index]
         self.index += 1
-        printx f"Iterating: {value}")
-        returnx value
+        print(f"Iterating: {value}")
+        return value
 
 # ========================
 # CONTEXT MANAGER PATTERNS
 # ========================
 
-classx CustomContextManager:
-    defx __init__(self, name):
+class CustomContextManager:
+    def __init__(self, name):
         self.name = name
-        printx f"Context manager {name} created")
+        print(f"Context manager {name} created")
     
-    defx __enter__(self):
-        printx f"Entering context: {self.name}")
-        returnx self
+    def __enter__(self):
+        print(f"Entering context: {self.name}")
+        return self
     
-    defx __exit__(self, exc_type, exc_val, exc_tb):
-        printx f"Exiting context: {self.name}")
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print(f"Exiting context: {self.name}")
         if exc_type:
-            printx f"Exception occurred: {exc_val}")
-        returnx False  # Don't suppress exceptions
+            print(f"Exception occurred: {exc_val}")
+        return False  # Don't suppress exceptions
 
 # ========================
 # ASYNCIO-LIKE PATTERNS (Simulated)
 # ========================
 
-defx async_like_function():
-    printx "Starting async-like operation")
+def async_like_function():
+    print("Starting async-like operation")
     
-    defx simulated_callback(result):
-        printx f"Callback received: {result}")
-        returnx result.upper()
+    def simulated_callback(result):
+        print(f"Callback received: {result}")
+        return result.upper()
     
     results = []
     for i in range(3):
         data = f"async_data_{i}"
         processed = simulated_callback(data)
         results.append(processed)
-        printx f"Processed {i+1}/3")
+        print(f"Processed {i+1}/3")
     
-    printx "Async-like operations completed")
-    returnx results
+    print("Async-like operations completed")
+    return results
 
 # ========================
 # DATA PROCESSING PIPELINE
 # ========================
 
-defx data_processing_pipeline():
+def data_processing_pipeline():
     raw_data = [
         {"name": "Alice", "age": 25, "score": 85},
         {"name": "Bob", "age": 30, "score": 92},
@@ -111,12 +111,12 @@ defx data_processing_pipeline():
         {"name": "Diana", "age": 28, "score": 95}
     ]
     
-    printx "Starting data processing pipeline")
-    printx f"Raw data: {len(raw_data)} records")
+    print("Starting data processing pipeline")
+    print(f"Raw data: {len(raw_data)} records")
     
     # Filter: age > 25
     filtered_data = [record for record in raw_data if record["age"] > 25]
-    printx f"After age filter: {len(filtered_data)} records")
+    print(f"After age filter: {len(filtered_data)} records")
     
     # Transform: add grade
     for record in filtered_data:
@@ -126,7 +126,7 @@ defx data_processing_pipeline():
             record["grade"] = "B"
         else:
             record["grade"] = "C"
-        printx f"Processed: {record['name']} -> {record['grade']}")
+        print(f"Processed: {record['name']} -> {record['grade']}")
     
     # Aggregate: average score by grade
     grade_stats = {}
@@ -138,15 +138,15 @@ defx data_processing_pipeline():
     
     for grade, scores in grade_stats.items():
         avg_score = sum(scores) / len(scores)
-        printx f"Grade {grade}: {len(scores)} students, avg score: {avg_score:.2f}")
+        print(f"Grade {grade}: {len(scores)} students, avg score: {avg_score:.2f}")
     
-    returnx (filtered_data, grade_stats)
+    return (filtered_data, grade_stats)
 
 # ========================
 # ERROR RECOVERY PATTERNS
 # ========================
 
-defx robust_processing_with_fallback():
+def robust_processing_with_fallback():
     operations = [
         lambda: 10 / 2,  # Normal operation
         lambda: 10 / 0,  # This will fail
@@ -160,22 +160,22 @@ defx robust_processing_with_fallback():
         try:
             result = operation()
             results.append(("success", result))
-            printx f"Operation {i+1}: SUCCESS -> {result}")
+            print(f"Operation {i+1}: SUCCESS -> {result}")
         except Exception as e:
             fallback_result = f"fallback_for_op_{i+1}"
             results.append(("error", fallback_result))
-            printx f"Operation {i+1}: ERROR -> {e}, using fallback: {fallback_result}")
+            print(f"Operation {i+1}: ERROR -> {e}, using fallback: {fallback_result}")
     
-    printx f"Processing completed: {len([r for r in results if r[0] == 'success'])} successful, {len([r for r in results if r[0] == 'error'])} with fallback")
-    returnx results
+    print(f"Processing completed: {len([r for r in results if r[0] == 'success'])} successful, {len([r for r in results if r[0] == 'error'])} with fallback")
+    return results
 
 # ========================
 # MAIN EXECUTION
 # ========================
 
-defx run_complex_tests():
-    printx "🧪 COMPLEX TEMPORARY TEST SUITE")
-    printx "=" * 50
+def run_complex_tests():
+    print("🧪 COMPLEX TEMPORARY TEST SUITE")
+    print("=" * 50)
     
     all_results = []
     
@@ -193,7 +193,7 @@ defx run_complex_tests():
     
     # Context manager test
     with CustomContextManager("TestContext") as cm:
-        printx f"Inside context: {cm.name}")
+        print(f"Inside context: {cm.name}")
         all_results.append(f"context_{cm.name}")
     
     # Async-like test
@@ -208,21 +208,21 @@ defx run_complex_tests():
     recovery_results = robust_processing_with_fallback()
     all_results.append(recovery_results)
     
-    printx "=" * 50
-    printx "🎉 All complex tests completed!")
-    printx f"📦 Total result sets: {len(all_results)}")
+    print("=" * 50)
+    print("🎉 All complex tests completed!")
+    print(f"📦 Total result sets: {len(all_results)}")
     
-    returnx all_results
+    return all_results
 
 if __name__ == "__main__":
-    printx "🚀 Starting Complex Temporary Test File")
-    printx "This file tests advanced Python patterns with syntax errors")
-    printx "Expected: This file should be DELETED by auto-healer")
-    printx ""
+    print("🚀 Starting Complex Temporary Test File")
+    print("This file tests advanced Python patterns with syntax errors")
+    print("Expected: This file should be DELETED by auto-healer")
+    print("")
     
     final_results = run_complex_tests()
     
-    printx ""
-    printx "📊 FINAL SUMMARY")
-    printx f"Generated {len(final_results)} complex result sets")
-    printx "File ready for auto-healer processing")
+    print("")
+    print("📊 FINAL SUMMARY")
+    print(f"Generated {len(final_results)} complex result sets")
+    print("File ready for auto-healer processing")
