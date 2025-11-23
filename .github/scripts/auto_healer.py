@@ -74,7 +74,8 @@ class PythonAutoHealer:
         files_removed = 0
         for pattern in test_patterns:
             for test_file in Path(directory).rglob(pattern):
-                if test_file.name != 'test_basic.py':  # Keep your actual test file
+                # Keep actual test files, remove only temporary ones
+                if test_file.name not in ['test_basic.py', 'conftest.py', '__init__.py']:
                     try:
                         test_file.unlink()
                         print(f"🗑️ Removed: {test_file}")
@@ -84,7 +85,7 @@ class PythonAutoHealer:
         
         return files_removed
     
-    def heal_directory(self, directory='.'):
+    def heal_directory(self, directory='.', auto_cleanup=False):
         """Heal all Python files in directory"""
         python_files = list(Path(directory).rglob('*.py'))
         print(f"🔍 Found {len(python_files)} Python files")
@@ -94,15 +95,33 @@ class PythonAutoHealer:
         
         print(f"🎯 Applied {self.fixes_applied} fixes across {len(python_files)} files")
         
-        # Optional: Cleanup test files
-        cleanup = input("Do you want to cleanup test files? (y/n): ").lower().strip()
-        if cleanup == 'y':
+        # Cleanup logic - auto in CI, interactive in local
+        if auto_cleanup:
+            # Automatic cleanup in CI environment
             removed = self.cleanup_test_files(directory)
-            print(f"🗑️ Removed {removed} test files")
+            print(f"🗑️ Auto-removed {removed} test files")
+        else:
+            # Interactive cleanup in local environment
+            try:
+                cleanup = input("Do you want to cleanup test files? (y/n): ").lower().strip()
+                if cleanup == 'y':
+                    removed = self.cleanup_test_files(directory)
+                    print(f"🗑️ Removed {removed} test files")
+            except EOFError:
+                # This happens in CI environments - skip interactive part
+                print("ℹ️  Running in CI environment - skipping interactive cleanup")
         
         return self.fixes_applied
 
 if __name__ == '__main__':
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Python Auto-Healer')
+    parser.add_argument('--auto-cleanup', action='store_true', 
+                       help='Automatically cleanup test files without prompt')
+    
+    args = parser.parse_args()
+    
     healer = PythonAutoHealer()
-    fixes = healer.heal_directory()
+    fixes = healer.heal_directory(auto_cleanup=args.auto_cleanup)
     sys.exit(0 if fixes >= 0 else 1)

@@ -25,7 +25,7 @@ jobs:
     - name: Run Auto-Healer
       run: |
         echo "🔍 Starting Super Python Auto-Healer..."
-        python .github/scripts/auto_healer.py
+        python .github/scripts/auto_healer.py --auto-cleanup
 
     - name: Install dependencies
       run: |
