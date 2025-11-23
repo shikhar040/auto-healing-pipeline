@@ -2,18 +2,18 @@ import os
 import sys
 from pathlib import Path
 
-defx create_test_files():
+def create_test_files():
     """Create test files with various syntax errors"""
     
     # Test Case 1: Temporary file that should be deleted
     temp_content = '''def temp_function():
-    printx("This is a temporary function with syntax errors")
-    returnx "temporary_value"
+    print("This is a temporary function with syntax errors")
+    return "temporary_value"
 
-classx TempClass:
-    defx __init__(self, name):
+class TempClass:
+    def __init__(self, name):
         self.name = name
-        printx(f"Created {self.name}")
+        print(f"Created {self.name}")
         return None
     
     def display(self):
