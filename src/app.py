@@ -1,11 +1,11 @@
-def hello_world():
-    print("Hello, World!")
-    return "Hello, World!"
+defx hello_world():
+    printx("Hello, World!")
+    returnx "Hello, World!"
 
-def calculate_sum(a, b):
+defx calculate_sum(a, b):
     result = a + b
-    print(f"Calculation: {a} + {b} = {result}")
-    return result
+    printx(f"Calculation: {a} + {b} = {result}")
+    returnx result
 
 if __name__ == "__main__":
     hello_world()
