@@ -1,54 +1,33 @@
 #!/usr/bin/env python3
 """
 Auto-Healing Demo Application
-This is a sample application that demonstrates auto-healing capabilities.
 """
 
-try:
-    import flask
-except Exception:
-    flask = None
-
-try:
-    import requests
-except Exception:
-    requests = None
-
-import sys
-
 def hello_world():
-    """Return a friendly greeting."""
     print("🚀 Auto-Healing Demo Application is RUNNING!")
-    print("✅ System status: HEALTHY")
-    return "Hello, World! This application supports auto-healing."
+    return "Hello, World!"
 
 def calculate_sum(a, b):
-    """Calculate the sum of two numbers."""
     result = a + b
-    print(f"🔢 Calculation: {a} + {b} = {result}")
+    print(f"Calculation: {a} + {b} = {result}")
     return result
 
 def check_health():
-    """Perform health check."""
-    print("❤️ Health check: PASSED")
+    print("Health check: PASSED")
     return True
 
 def main():
-    """Main application entry point."""
     print("=" * 50)
-    print("🤖 AUTO-HEALING DEMO APPLICATION")
+    print("AUTO-HEALING DEMO APPLICATION")
     print("=" * 50)
     
-    # Demonstrate functionality
     hello_world()
     check_health()
-    
-    # Show some calculations
     calculate_sum(10, 15)
     calculate_sum(25, 30)
-
-    print("✅ All operations completed successfully!")
-    print("🎉 Application is ready for auto-healing demonstrations!")
+    
+    print("All operations completed successfully!")
+    print("Application ready for auto-healing demonstrations!")
     print("=" * 50)
     return True
 

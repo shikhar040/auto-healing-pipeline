@@ -1,282 +1,45 @@
-name: 🤖 Super Advanced Auto-Healing Pipeline
+name: Auto Healing Pipeline
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 */6 * * *'  # Har 6 ghante automatic health check
 
 jobs:
-  super-healing:
+  build-and-test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      actions: write
-      
+    
     steps:
-    - name: 🔄 Checkout with Full Access
+    - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        fetch-depth: 0
-        
-    - name: 🐍 Setup Python with Multiple Versions
+      
+    - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
         
-    - name: 🏥 Super Diagnostic & Healing Engine
-      id: super_heal
+    - name: Auto-heal broken files
+      id: heal
       run: |
-        echo "🚀 STARTING SUPER AUTO-HEALING ENGINE..."
-        echo "=========================================="
-        
-        # Initialize variables
-        TOTAL_FIXES=0
-        HEALING_REPORT="🩺 SUPER HEALING REPORT:\n"
-        NEEDS_COMMIT="false"
-        
-        # 🔧 LAYER 1: FILE SYSTEM HEALING
-        echo "📁 Scanning File System..."
-        
-        # Remove problematic files
-        PROBLEMATIC_FILES=("broken.txt" "error.log" "temp.txt" "debug.txt" "test.bad")
-        for file in "${PROBLEMATIC_FILES[@]}"; do
-          if [ -f "$file" ]; then
-            echo "🚑 Removing $file"
-            rm "$file"
-            HEALING_REPORT+="✅ Removed $file\n"
-            ((TOTAL_FIXES++))
-            NEEDS_COMMIT="true"
-          fi
-        done
-        
-        # 🔧 LAYER 2: PYTHON CODE HEALING
-        echo "🐍 Scanning Python Code..."
-        
-        # Find all Python files
-        find . -name "*.py" | while read pyfile; do
-          echo "🔍 Checking $pyfile"
-          
-          # Backup original file
-          cp "$pyfile" "$pyfile.backup"
-          
-          # FIX 1: Print function errors
-          sed -i 's/printx(/print(/g' "$pyfile" 2>/dev/null || true
-          sed -i 's/print \(/print(/g' "$pyfile" 2>/dev/null || true
-          sed -i 's/printx (/print(/g' "$pyfile" 2>/dev/null || true
-          
-          # FIX 2: Import errors
-          sed -i 's/importx /import /g' "$pyfile" 2>/dev/null || true
-          sed -i 's/fromx /from /g' "$pyfile" 2>/dev/null || true
-          sed -i 's/import flask/import flask/g' "$pyfile" 2>/dev/null || true
-          
-          # FIX 3: Syntax errors
-          sed -i 's/defx /def /g' "$pyfile" 2>/dev/null || true
-          sed -i 's/classx /class /g' "$pyfile" 2>/dev/null || true
-          sed -i 's/returnx /return /g' "$pyfile" 2>/dev/null || true
-          
-          # FIX 4: Quote errors
-          sed -i 's/"""/"/g' "$pyfile" 2>/dev/null || true
-          sed -i "s/''''/'/g" "$pyfile" 2>/dev/null || true
-          
-          # FIX 5: Missing colons
-          sed -i 's/def [a-zA-Z_][a-zA-Z_0-9]*()/&:/g' "$pyfile" 2>/dev/null || true
-          sed -i 's/class [a-zA-Z_][a-zA-Z_0-9]*()/&:/g' "$pyfile" 2>/dev/null || true
-          sed -i 's/if [^:]*$/&:/g' "$pyfile" 2>/dev/null || true
-          sed -i 's/for [^:]*$/&:/g' "$pyfile" 2>/dev/null || true
-          sed -i 's/while [^:]*$/&:/g' "$pyfile" 2>/dev/null || true
-          
-          # FIX 6: Indentation issues (basic)
-          sed -i 's/    /\t/g' "$pyfile" 2>/dev/null || true
-          
-          # Test if file is now valid Python
-          if python -m py_compile "$pyfile"; then
-            echo "✅ $pyfile - Healing successful"
-            rm "$pyfile.backup"
-            if ! cmp -s "$pyfile" "$pyfile.backup" 2>/dev/null; then
-              ((TOTAL_FIXES++))
-              NEEDS_COMMIT="true"
-              HEALING_REPORT+="✅ Fixed Python syntax in $pyfile\n"
-            fi
-          else
-            echo "❌ $pyfile - Could not auto-heal, restoring backup"
-            cp "$pyfile.backup" "$pyfile"
-            rm "$pyfile.backup"
-          fi
-        done
-        
-        # 🔧 LAYER 3: DEPENDENCY HEALING
-        echo "📦 Scanning Dependencies..."
-        
-        # Ensure requirements.txt exists with basic packages
-        if [ ! -f "requirements.txt" ]; then
-          echo "🚑 Creating missing requirements.txt"
-          cat > requirements.txt << EOF
-        flask==2.3.3
-        requests==2.31.0
-        pytest==7.4.0
-        python-dotenv==1.0.0
-        EOF
-          HEALING_REPORT+="✅ Created requirements.txt\n"
-          ((TOTAL_FIXES++))
-          NEEDS_COMMIT="true"
-        else
-          # Fix common requirement issues
-          sed -i 's/>=/==/g' requirements.txt 2>/dev/null || true
-          sed -i 's/~/==/g' requirements.txt 2>/dev/null || true
-          sed -i 's/\[.*\]//g' requirements.txt 2>/dev/null || true
-        fi
-        
-        # 🔧 LAYER 4: CONFIGURATION HEALING
-        echo "⚙️ Scanning Configuration..."
-        
-        # Ensure essential config files
-        ESSENTIAL_FILES=(".gitignore" "README.md")
-        for file in "${ESSENTIAL_FILES[@]}"; do
-          if [ ! -f "$file" ]; then
-            echo "🚑 Creating missing $file"
-            case "$file" in
-              ".gitignore")
-                cat > .gitignore << EOF
-        # Python
-        __pycache__/
-        *.pyc
-        *.pyo
-        *.pyd
-        .Python
-        env/
-        venv/
-        
-        # IDE
-        .vscode/
-        .idea/
-        
-        # OS
-        .DS_Store
-        Thumbs.db
-        
-        # Logs
-        *.log
-        logs/
-                EOF
-                ;;
-              "README.md")
-                echo "# 🤖 Super Auto-Healing Pipeline Project" > README.md
-                ;;
-            esac
-            HEALING_REPORT+="✅ Created $file\n"
-            ((TOTAL_FIXES++))
-            NEEDS_COMMIT="true"
-          fi
-        done
-        
-        # 🔧 LAYER 5: TEST SUITE HEALING
-        echo "🧪 Scanning Test Suite..."
-        
-        if [ ! -f "tests/test_script.sh" ]; then
-          mkdir -p tests
-          cat > tests/test_script.sh << 'EOF'
-        #!/bin/bash
-        echo "🧪 SUPER AUTO-HEALING TEST SUITE"
-        echo "=================================="
-        
-        # Test Python files
-        find . -name "*.py" | while read file; do
-          if python -m py_compile "$file"; then
-            echo "✅ $file - Syntax OK"
-          else
-            echo "❌ $file - Syntax Error"
-            exit 1
-          fi
-        done
-        
-        # Test requirements
-        if [ -f "requirements.txt" ]; then
-          pip install -r requirements.txt && echo "✅ Dependencies OK"
-        fi
-        
-        echo "🎉 ALL TESTS PASSED - SYSTEM HEALTHY"
-        EOF
-          chmod +x tests/test_script.sh
-          HEALING_REPORT+="✅ Created test suite\n"
-          ((TOTAL_FIXES++))
-          NEEDS_COMMIT="true"
-        fi
-        
-        # Final Report
-        echo "=========================================="
-        echo "🏥 HEALING COMPLETE"
-        echo "🔧 Total fixes applied: $TOTAL_FIXES"
-        echo -e "$HEALING_REPORT"
-        
-        # Set outputs
-        if [ "$NEEDS_COMMIT" = "true" ]; then
+        echo "🔍 Scanning for broken files..."
+        if [ -f "broken.txt" ]; then
+          echo "🚑 Removing broken.txt"
+          rm broken.txt
           echo "needs_commit=true" >> $GITHUB_OUTPUT
-          echo "total_fixes=$TOTAL_FIXES" >> $GITHUB_OUTPUT
         fi
         
-    - name: 💾 Commit Super Healing
-      if: steps.super_heal.outputs.needs_commit == 'true'
+    - name: Commit fixes
+      if: steps.heal.outputs.needs_commit == 'true'
       run: |
-        echo "💾 Committing ${{ steps.super_heal.outputs.total_fixes }} fixes..."
-        git config --local user.email "super-healer@github.com"
-        git config --local user.name "🤖 Super Auto-Heal Bot"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         git add .
-        git commit -m "🤖 SUPER HEAL: Fixed ${{ steps.super_heal.outputs.total_fixes }} issues - $(date +'%Y-%m-%d %H:%M:%S')"
+        git commit -m "🤖 Auto-heal: Removed broken files"
         git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
         
-    - name: 🧪 Run Super Validation
+    - name: Run tests
       run: |
-        echo "🧪 RUNNING SUPER VALIDATION SUITE..."
-        echo "====================================="
+        echo "🧪 Testing..."
+        bash tests/test_script.sh
         
-        # Python validation
-        echo "🐍 Validating Python files..."
-        find . -name "*.py" -exec python -m py_compile {} \; && echo "✅ All Python files valid"
-        
-        # Test suite execution
-        if [ -f "tests/test_script.sh" ]; then
-          bash tests/test_script.sh
-        fi
-        
-        # Dependency check
-        if [ -f "requirements.txt" ]; then
-          pip install -r requirements.txt
-        fi
-        
-    - name: 📊 Generate Super Health Report
-      run: |
-        echo " "
-        echo "📊 SUPER AUTO-HEALING HEALTH REPORT"
-        echo "===================================="
-        echo "🕐 Timestamp: $(date)"
-        echo "✅ Status: OPTIMAL"
-        echo "🤖 Healing: ACTIVE"
-        FIXES="${{ steps.super_heal.outputs.total_fixes }}"
-        echo "🔧 Fixes Applied: ${FIXES:-0}"
-        echo "📈 Recovery Rate: 100%"
-        echo "🚀 System: SELF-SUSTAINING"
-        echo "🎯 Capability: PRODUCTION READY"
-        echo "===================================="
-        echo "💪 ALL SYSTEMS OPERATIONAL"
-        
-    - name: 🎉 Final Success Celebration
-      if: success()
-      run: |
-        echo " "
-        echo "🎉🎊🎈 CELEBRATION TIME! 🎈🎊🎉"
-        echo "╔══════════════════════════════╗"
-        echo "║    SUPER AUTO-HEALING       ║"
-        echo "║       SUCCESSFUL!           ║"
-        echo "╚══════════════════════════════╝"
-        echo "✨ Your pipeline can now heal:"
-        echo "✅ Python syntax errors"
-        echo "✅ Missing files"
-        echo "✅ Dependency issues"
-        echo "✅ Configuration problems"
-        echo "✅ And much more!"
-        echo " "
-        echo "🚀 READY FOR ANY CHALLENGE!"
+    - name: Success
+      run: echo "🎉 Auto-healing successful!"
