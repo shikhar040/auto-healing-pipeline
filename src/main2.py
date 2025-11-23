@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-defx create_test_files():
+def create_test_files():
     """Create test files with various syntax errors"""
     
     # Test Case 1: Temporary file that should be deleted
