@@ -1,127 +1,79 @@
-﻿#!/usr/bin/env python3
-"""
-Super Python Auto-Healer
-Fixes common Python syntax errors automatically
-"""
+name: Super Python Auto-Healer
 
-import os
-import re
-import sys
-from pathlib import Path
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 6 * * *'  # Run daily at 6 AM UTC
 
-class PythonAutoHealer:
-    def __init__(self):
-        self.fixes_applied = 0
-        self.common_fixes = [
-            # Function definitions
-            (r'defx\s+', 'def '),
-            
-            # Print statements - multiple patterns
-            (r'printx\s*\(', 'print('),  # print(with parentheses
-            (r'printx\s+', 'print('),    # print(without parentheses
-            (r'print\s+(".*?"|\'.*?\')', r'print(\1)'),  # print(without) parentheses
-            (r'print\s+(\w+)', r'print(\1)'),  # print(variable) without parentheses
-            
-            # Return statements
-            (r'returnx\s+', 'return '),
-            
-            # Class definitions
-            (r'classx\s+', 'class '),
-        ]
-    
-    def heal_file(self, file_path):
-        """Apply fixes to a single Python file"""
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                original_content = f.read()
-            
-            healed_content = original_content
-            for pattern, replacement in self.common_fixes:
-                healed_content = re.sub(pattern, replacement, healed_content)
-            
-            # Add missing closing parentheses for print(statements)
-            lines = healed_content.split('\n')
-            fixed_lines = []
-            for line in lines:
-                if 'print(' in line and not line.rstrip().endswith(')') and '#' not in line:
-                    # Count quotes to see if we have a complete string
-                    if line.count('"') % 2 == 0 and line.count("'") % 2 == 0:
-                        line += ')'
-                fixed_lines.append(line)
-            
-            healed_content = '\n'.join(fixed_lines)
-            
-            if healed_content != original_content:
-                with open(file_path, 'w', encoding='utf-8') as f:
-                    f.write(healed_content)
-                self.fixes_applied += 1
-                print(f"✅ Healed: {file_path}")
-                return True
-                
-        except Exception as e:
-            print(f"❌ Error healing {file_path}: {e}")
-            return False
-    
-    def cleanup_test_files(self, directory='.'):
-        """Remove test files created during testing"""
-        test_patterns = [
-            '*test*.py',
-            '*broken*.py', 
-            'temp_*.py',
-            'test_*.py'
-        ]
-        
-        files_removed = 0
-        for pattern in test_patterns:
-            for test_file in Path(directory).rglob(pattern):
-                # Keep actual test files, remove only temporary ones
-                if test_file.name not in ['test_basic.py', 'conftest.py', '__init__.py']:
-                    try:
-                        test_file.unlink()
-                        print(f"🗑️ Removed: {test_file}")
-                        files_removed += 1
-                    except Exception as e:
-                        print(f"❌ Error removing {test_file}: {e}")
-        
-        return files_removed
-    
-    def heal_directory(self, directory='.', auto_cleanup=False):
-        """Heal all Python files in directory"""
-        python_files = list(Path(directory).rglob('*.py'))
-        print(f"🔍 Found {len(python_files)} Python files")
-        
-        for py_file in python_files:
-            self.heal_file(str(py_file))
-        
-        print(f"🎯 Applied {self.fixes_applied} fixes across {len(python_files)} files")
-        
-        # Cleanup logic - auto in CI, interactive in local
-        if auto_cleanup:
-            # Automatic cleanup in CI environment
-            removed = self.cleanup_test_files(directory)
-            print(f"🗑️ Auto-removed {removed} test files")
-        else:
-            # Interactive cleanup in local environment
-            try:
-                cleanup = input("Do you want to cleanup test files? (y/n): ").lower().strip()
-                if cleanup == 'y':
-                    removed = self.cleanup_test_files(directory)
-                    print(f"🗑️ Removed {removed} test files")
-            except EOFError:
-                # This happens in CI environments - skip interactive part
-                print("ℹ️  Running in CI environment - skipping interactive cleanup")
-        
-        return self.fixes_applied
+jobs:
+  auto-heal:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
-if __name__ == '__main__':
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='Python Auto-Healer')
-    parser.add_argument('--auto-cleanup', action='store_true', 
-                       help='Automatically cleanup test files without prompt')
-    
-    args = parser.parse_args()
-    
-    healer = PythonAutoHealer()
-    fixes = healer.heal_directory(auto_cleanup=args.auto_cleanup)
-    sys.exit(0 if fixes >= 0 else 1)
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Run Auto-Healer
+      run: |
+        echo "🔍 Starting Super Python Auto-Healer..."
+        python .github/scripts/auto_healer.py --auto-cleanup
+
+    - name: Install dependencies
+      run: |
+        echo "📦 Installing dependencies..."
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+
+    - name: Test application
+      run: |
+        echo "🚀 Testing Python application..."
+        # Test syntax of all Python files
+        find . -name "*.py" -exec python -m py_compile {} \;
+        
+        # Run main application
+        if [ -f "src/app.py" ]; then
+          python src/app.py
+        fi
+        
+        # Run tests
+        if [ -f "tests/test_basic.py" ]; then
+          python tests/test_basic.py
+        fi
+
+    - name: Commit and push fixes
+      run: |
+        echo "📝 Checking for changes to commit..."
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Check if there are changes to commit
+        git add .
+        if ! git diff --staged --quiet; then
+          git commit -m "🤖 Auto-heal: Fixed Python syntax errors"
+          git push
+          echo "✅ Changes committed and pushed"
+        else
+          echo "✅ No changes to commit"
+        fi
+
+    - name: Generate report
+      run: |
+        echo "📊 Generating final report..."
+        echo "### 🛠️ Auto-Healing Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
+        echo "**Python Version:** $(python --version)" >> $GITHUB_STEP_SUMMARY
+        echo "**Workflow:** Auto-healing completed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "---" >> $GITHUB_STEP_SUMMARY
+        echo "Job completed at: $(date)" >> $GITHUB_STEP_SUMMARY
