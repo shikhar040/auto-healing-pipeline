@@ -1,4 +1,4 @@
-﻿name: Super Python Auto-Healer
+name: Super Python Auto-Healer
 
 on:
   push:
@@ -43,6 +43,11 @@ jobs:
         # Run main application
         if [ -f "src/app.py" ]; then
           python src/app.py
+        fi
+        
+        # Run tests
+        if [ -f "tests/test_basic.py" ]; then
+          python tests/test_basic.py
         fi
 
     - name: Commit and push fixes
