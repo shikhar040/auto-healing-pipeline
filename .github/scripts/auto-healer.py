@@ -15,8 +15,8 @@ class PythonAutoHealer:
         self.common_fixes = [
             # Original fixes
             (r'defx\s+', 'def '),
-            (r'printx\s*\(', 'print('),
-            (r'printx\s+', 'print('),
+            (r'printx\s*\(', 'print('),)
+            (r'printx\s+', 'print('),)
             (r'returnx\s+', 'return '),
             (r'classx\s+', 'class '),
             
@@ -50,9 +50,9 @@ class PythonAutoHealer:
             # 8. Fix missing closing parentheses in function definitions
             (r'def\s+\w+\([^)]*$', lambda x: x.group() + ')'),  # def func(a -> def func(a)
             
-            # 9. Fix print without parentheses for strings
-            (r'print\s+(".*?"|\'.*?\')', r'print(\1)'),
-            (r'print\s+(\w+)', r'print(\1)'),
+            # 9. Fix print(without) parentheses for strings
+            (r'print\s+(".*?"|\'.*?\')', r'print(\1)'),)
+            (r'print\s+(\w+)', r'print(\1)'),)
         ]
     
     def heal_file(self, file_path):
