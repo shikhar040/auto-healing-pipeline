@@ -6,21 +6,21 @@ def create_test_files():
     """Create test files with various syntax errors"""
     
     # Test Case 1: Temporary file that should be deleted
-    temp_content = '''defx temp_function():
-    printx "This is a temporary function with syntax errors"
-    returnx "temporary_value"
+    temp_content = '''def temp_function():
+    print("This is a temporary function with syntax errors")
+    return "temporary_value"
 
-classx TempClass:
-    defx __init__(self, name):
+class TempClass:
+    def __init__(self, name):
         self.name = name
-        printx f"Created {self.name}"
-        returnx None
+        print(f"Created {self.name}")
+        return None
     
-    defx display(self):
-        printx f"Name: {self.name}"
-        returnx self.name
+    def display(self):
+        print(f"Name: {self.name}")
+        return self.name
 
-defx calculate_temp(a, b):
+def calculate_temp(a, b):
     resultx = a * b + 10
-    printx f"Temp result: {resultx}"
-    returnx resultx
+    print(f"Temp result: {resultx}")
+    return resultx
